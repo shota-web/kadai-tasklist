@@ -1,11 +1,14 @@
 class TasksController < ApplicationController
     before_action :set_task, only: [:show, :edit, :update, :destroy]
-    before_action :require_user_logged_in, only: [:index, :show]
-    before_action :correct_user, only: [:show]
+    before_action :require_user_logged_in
+    # before_action :correct_user
     
-    def index
-        @tasks = Task.all
+  def index
+    if logged_in?
+      @task = current_user.tasks.build  # form_with 用
+      @tasks = current_user.tasks.order(id: :desc).page(params[:page])
     end
+  end
 
     def show
     end
@@ -54,8 +57,8 @@ class TasksController < ApplicationController
     end
     
     def correct_user
-        @user = current_user.tasklists.find_by(id: params[:id])
-        unless @user
+        @task = current_user.tasks.find_by(id: params[:id])
+        unless @task
             redirect_to root_url
         end
     end
